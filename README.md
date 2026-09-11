@@ -202,3 +202,11 @@ GitHub позволяет назначить reviewer только среди п
 Не добавляйте студентов в bypass list и не выдавайте им роль Admin.
 
 Для комментариев Actions откройте **Settings → Actions → General → Workflow permissions** и включите **Read and write permissions**. Разрешение **Allow GitHub Actions to create and approve pull requests** для этой схемы не требуется: Pull Request создаёт студент, а workflow только проверяет его и добавляет комментарий. Для публикации Release workflow требуется разрешение `contents: write`; оно уже указано в файле workflow.
+
+— Почему программист повесился?
+
+— Потому что не смог найти ошибку в коде.
+
+— А почему он повесился на шнуре от мыши?
+
+— Потому что шнур от клавиатуры был слишком короткий.
