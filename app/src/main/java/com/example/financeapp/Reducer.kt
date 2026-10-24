@@ -1,9 +1,6 @@
 package com.example.financeapp
 
-internal fun reduce(
-    state: MainUiState,
-    event: MainUiEvent,
-): MainUiState = when (event) {
+internal fun reduce(state: MainUiState, event: MainUiEvent): MainUiState = when (event) {
     is MainUiEvent.AddTransaction -> {
         val transaction = event.transaction
         require(transaction.amount > 0) { "Amount must be positive" }
@@ -15,8 +12,7 @@ internal fun reduce(
 
         state.copy(
             balance = state.balance + change,
-            transactionCount = state.transactionCount + 1
+            transactionCount = state.transactionCount + 1,
         )
     }
 }
-
