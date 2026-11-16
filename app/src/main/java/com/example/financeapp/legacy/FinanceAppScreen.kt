@@ -1,5 +1,7 @@
-package com.example.financeapp
+package com.example.financeapp.legacy
 
+import com.example.financeapp.R
+import com.example.financeapp.FinanceAppTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
