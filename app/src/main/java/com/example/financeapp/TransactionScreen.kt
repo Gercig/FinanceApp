@@ -25,9 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 @Suppress("FunctionNaming")
-internal fun TransactionScreen(
-    viewModel: TransactionViewModel = viewModel(),
-) {
+internal fun TransactionScreen(viewModel: TransactionViewModel = viewModel()) {
     val state = viewModel.uiState
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -37,42 +35,14 @@ internal fun TransactionScreen(
                 .padding(24.dp),
         ) {
             Text(stringResource(R.string.transaction_title))
-            Text(stringResource(
-                R.string.balance_summary,
-                state.balance,
-                state.transactionCount,
-            ))
-            OutlinedTextField(
-                value = state.description,
-                onValueChange = {
-                    viewModel.onEvent(MainUiEvent.DescriptionChanged(it))
-                },
-                label = { Text(stringResource(R.string.transaction_description)) },
+            Text(
+                stringResource(
+                    R.string.balance_summary,
+                    state.balance,
+                    state.transactionCount,
+                ),
             )
-            OutlinedTextField(
-                value = state.amount,
-                onValueChange = { viewModel.onEvent(
-                    MainUiEvent.AmountChanged(it)
-                ) },
-                label = { Text(stringResource(R.string.transaction_amount)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            )
-            Row {
-                FilterChip(
-                    selected = state.type == TransactionType.EXPENSE,
-                    onClick = { viewModel.onEvent(
-                        MainUiEvent.TypeChanged(TransactionType.EXPENSE)
-                    ) },
-                    label = { Text(stringResource(R.string.transaction_expense)) },
-                )
-                FilterChip(
-                    selected = state.type == TransactionType.INCOME,
-                    onClick = { viewModel.onEvent(
-                        MainUiEvent.TypeChanged(TransactionType.INCOME)
-                    ) },
-                    label = { Text(stringResource(R.string.transaction_income)) },
-                )
-            }
+            TransactionInputs(state, viewModel::onEvent)
             state.error?.let { error ->
                 val textId = when (error) {
                     TransactionError.INVALID_INPUT -> R.string.transaction_invalid_input
@@ -80,21 +50,65 @@ internal fun TransactionScreen(
                 }
                 Text(
                     stringResource(textId),
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
                 )
             }
             Button(onClick = viewModel::addTransaction) {
                 Text(stringResource(R.string.transaction_add))
             }
-            if (state.transactions.isNotEmpty()) {
-                Text(stringResource(R.string.transaction_history))
-                state.transactions.asReversed().forEach { tx ->
-                    val row = if (tx.type == TransactionType.INCOME)
-                        R.string.transaction_history_income
-                    else R.string.transaction_history_expense
-                    Text(stringResource(row, tx.description, tx.amount))
-                }
+            TransactionHistory(state.transactions)
+        }
+    }
+}
+
+@Composable
+@Suppress("FunctionNaming")
+private fun TransactionInputs(state: MainUiState, onEvent: (MainUiEvent) -> Unit) {
+    OutlinedTextField(
+        value = state.description,
+        onValueChange = {
+            onEvent(MainUiEvent.DescriptionChanged(it))
+        },
+        label = { Text(stringResource(R.string.transaction_description)) },
+    )
+    OutlinedTextField(
+        value = state.amount,
+        onValueChange = {
+            onEvent(MainUiEvent.AmountChanged(it))
+        },
+        label = { Text(stringResource(R.string.transaction_amount)) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+    )
+    Row {
+        FilterChip(
+            selected = state.type == TransactionType.EXPENSE,
+            onClick = {
+                onEvent(MainUiEvent.TypeChanged(TransactionType.EXPENSE))
+            },
+            label = { Text(stringResource(R.string.transaction_expense)) },
+        )
+        FilterChip(
+            selected = state.type == TransactionType.INCOME,
+            onClick = {
+                onEvent(MainUiEvent.TypeChanged(TransactionType.INCOME))
+            },
+            label = { Text(stringResource(R.string.transaction_income)) },
+        )
+    }
+}
+
+@Composable
+@Suppress("FunctionNaming")
+private fun TransactionHistory(transactions: List<Transaction>) {
+    if (transactions.isNotEmpty()) {
+        Text(stringResource(R.string.transaction_history))
+        transactions.asReversed().forEach { tx ->
+            val row = if (tx.type == TransactionType.INCOME) {
+                R.string.transaction_history_income
+            } else {
+                R.string.transaction_history_expense
             }
+            Text(stringResource(row, tx.description, tx.amount))
         }
     }
 }
