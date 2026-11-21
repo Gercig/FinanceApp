@@ -42,18 +42,23 @@ internal fun TransactionScreen(viewModel: TransactionViewModel = viewModel()) {
                     state.transactionCount,
                 ),
             )
-            TransactionInputs(state, viewModel::onEvent)
+            if (state.isLoading) {
+                Text(stringResource(R.string.transaction_loading))
+            }
+            val enabled = state.isDatabaseReady && !state.isSaving
+            TransactionInputs(state, enabled, viewModel::onEvent)
             state.error?.let { error ->
                 val textId = when (error) {
                     TransactionError.INVALID_INPUT -> R.string.transaction_invalid_input
                     TransactionError.AMOUNT_TOO_LARGE -> R.string.transaction_amount_too_large
+                    TransactionError.DATABASE_ERROR -> R.string.transaction_database_error
                 }
                 Text(
                     stringResource(textId),
                     color = MaterialTheme.colorScheme.error,
                 )
             }
-            Button(onClick = viewModel::addTransaction) {
+            Button(onClick = viewModel::addTransaction, enabled = enabled) {
                 Text(stringResource(R.string.transaction_add))
             }
             TransactionHistory(state.transactions)
@@ -63,13 +68,14 @@ internal fun TransactionScreen(viewModel: TransactionViewModel = viewModel()) {
 
 @Composable
 @Suppress("FunctionNaming")
-private fun TransactionInputs(state: MainUiState, onEvent: (MainUiEvent) -> Unit) {
+private fun TransactionInputs(state: MainUiState, enabled: Boolean, onEvent: (MainUiEvent) -> Unit) {
     OutlinedTextField(
         value = state.description,
         onValueChange = {
             onEvent(MainUiEvent.DescriptionChanged(it))
         },
         label = { Text(stringResource(R.string.transaction_description)) },
+        enabled = enabled,
     )
     OutlinedTextField(
         value = state.amount,
@@ -78,6 +84,7 @@ private fun TransactionInputs(state: MainUiState, onEvent: (MainUiEvent) -> Unit
         },
         label = { Text(stringResource(R.string.transaction_amount)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        enabled = enabled,
     )
     Row {
         FilterChip(
@@ -86,6 +93,7 @@ private fun TransactionInputs(state: MainUiState, onEvent: (MainUiEvent) -> Unit
                 onEvent(MainUiEvent.TypeChanged(TransactionType.EXPENSE))
             },
             label = { Text(stringResource(R.string.transaction_expense)) },
+            enabled = enabled,
         )
         FilterChip(
             selected = state.type == TransactionType.INCOME,
@@ -93,6 +101,7 @@ private fun TransactionInputs(state: MainUiState, onEvent: (MainUiEvent) -> Unit
                 onEvent(MainUiEvent.TypeChanged(TransactionType.INCOME))
             },
             label = { Text(stringResource(R.string.transaction_income)) },
+            enabled = enabled,
         )
     }
 }
